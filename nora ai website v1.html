@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>NORA AI — Luxury Operational Defense</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-<!-- Spline 3D Web Component -->
+<!-- Preload Spline Scene & Script for Fastest Possible Loading -->
+<link rel="preload" href="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" as="fetch" crossorigin="anonymous" />
+<link rel="modulepreload" href="https://unpkg.com/@splinetool/viewer@1.0.94/build/spline-viewer.js" />
 <script type="module" src="https://unpkg.com/@splinetool/viewer@1.0.94/build/spline-viewer.js"></script>
 
 <style>
@@ -41,7 +43,7 @@
   /* ─── SPACIOUS NAVIGATION ─────────────────────────────────────── */
   nav {
     position: fixed; top: 0; width: 100%; z-index: 1000;
-    padding: 2rem 6%; 
+    padding: 1.5rem 6%; 
     display: flex; align-items: center; justify-content: flex-end; 
     background: linear-gradient(to bottom, rgba(3,3,3,0.9) 0%, rgba(3,3,3,0) 100%);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -52,24 +54,26 @@
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: auto;
   }
   .nav-logo-text {
-    font-size: 2.8rem; font-weight: 900; text-transform: uppercase;
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; text-transform: uppercase;
     letter-spacing: 0.15em; color: rgba(255, 255, 255, 0.95); margin: 0;
     text-shadow: 0 0 20px rgba(255,255,255,0.2);
   }
   .nav-links { position: relative; z-index: 10; }
   .nav-links a {
     font-family: var(--mono); font-size: 0.7rem; color: var(--zinc-500); text-decoration: none;
-    letter-spacing: 0.3em; text-transform: uppercase; margin-left: 3rem; transition: color 0.4s ease, text-shadow 0.4s ease;
+    letter-spacing: 0.25em; text-transform: uppercase; margin-left: 2rem; transition: color 0.4s ease, text-shadow 0.4s ease;
   }
   .nav-links a:hover { color: var(--white); text-shadow: 0 0 10px rgba(255,255,255,0.3); }
 
   /* ─── HERO SECTION ────────────────────────────────────────────── */
   .hero {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex; align-items: center; justify-content: center;
     position: relative; overflow: hidden;
   }
   .hero::after {
-    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 250px;
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 200px;
     background: linear-gradient(to top, var(--matte-black) 0%, transparent 100%); z-index: 5; pointer-events: none;
   }
 
@@ -80,20 +84,38 @@
   }
   @keyframes fogBreathe { 0% { transform: scale(1); opacity: 0.05; } 100% { transform: scale(1.1); opacity: 0.25; } }
   
+  /* ─── 3D SPLINE WRAPPER & SMOOTH FADE ───────────── */
   .spline-wrapper {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
     display: flex; align-items: center; justify-content: center;
+    touch-action: pan-y; /* Allows smooth vertical scrolling on touch devices */
   }
-  spline-viewer { width: 100%; height: 100%; }
+  
+  spline-viewer {
+    width: 100%; height: 100%;
+    opacity: 0; /* Starts hidden to prevent jarring pop-in */
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  spline-viewer.loaded {
+    opacity: 1; /* Triggered smoothly once WebGL compiles */
+  }
+  
   spline-viewer::part(logo) { display: none !important; }
   spline-viewer::part(watermark) { display: none !important; }
+
   .spline-watermark-blocker {
     position: absolute; bottom: 0; right: 0; width: 250px; height: 80px; background-color: var(--matte-black); z-index: 10;
   }
 
-  /* ─── HERO LEFT/RIGHT TEXT ───────────────────────── */
-  .hero-left-mini { position: absolute; left: 8%; top: 30%; transform: translateY(-50%); z-index: 2; pointer-events: none; }
-  .hero-right-mini { position: absolute; right: 5%; top: 30%; transform: translateY(-50%); z-index: 2; pointer-events: none; max-width: 360px; }
+  /* ─── HERO LEFT/RIGHT TEXT (DESKTOP) ─────────────── */
+  .hero-left-mini { 
+    position: absolute; left: 8%; top: 30%; transform: translateY(-50%); 
+    z-index: 2; pointer-events: none; max-width: 450px;
+  }
+  .hero-right-mini { 
+    position: absolute; right: 5%; top: 30%; transform: translateY(-50%); 
+    z-index: 2; pointer-events: none; max-width: 360px; 
+  }
   .hero-right-mini * { pointer-events: auto; }
   
   .tag-pill {
@@ -107,18 +129,15 @@
   }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
-  /* ─── ERP SOLAR SYSTEM SECTION (NETWORK VIEW) ───────────────────────────────── */
+  /* ─── ERP SOLAR SYSTEM SECTION ───────────────────────────────── */
   .erp-solar-section {
     padding: 6rem 0 10rem 0;
     position: relative; z-index: 10; overflow: hidden;
     background: radial-gradient(circle at center, rgba(30,30,30,0.4) 0%, var(--matte-black) 70%);
   }
   
-  .solar-header {
-    text-align: center; margin-bottom: 0rem; position: relative; z-index: 15;
-  }
+  .solar-header { text-align: center; margin-bottom: 0rem; position: relative; z-index: 15; padding: 0 5%; }
 
-  /* ─── FLOATING SOLAR SYSTEM TEXTS ─── */
   .solar-left-mini {
     position: absolute; left: 4%; top: 50%; transform: translateY(-50%);
     z-index: 20; pointer-events: none; max-width: 320px; text-align: left;
@@ -204,7 +223,7 @@
     position: absolute; top: -35px; left: 50%; transform: translateX(-50%); color: var(--zinc-400); font-family: var(--mono); font-size: 0.65rem; white-space: nowrap; letter-spacing: 0.1em;
     background: rgba(0,0,0,0.9); padding: 4px 10px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15); transition: color 0.3s, border-color 0.3s; z-index: 20;
   }
-  .planet-counter-spin:hover .planet-label { color: #fff; border-color: rgba(255,255,255,0.6); box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+  .planet-counter-spin:hover .planet-label { color: #fff; border-color: rgba(0,198,255,0.6); box-shadow: 0 0 15px rgba(0,198,255,0.3); }
 
   .orbit-1 { width: 260px; height: 260px; margin: -130px 0 0 -130px; animation: orbitSpin 12s linear infinite; }
   .counter-1 { animation: counterSpin 12s linear infinite; }
@@ -241,8 +260,7 @@
   @keyframes counterSpin { 100% { transform: rotate(-360deg); } }
   @keyframes spinFire { 100% { transform: rotate(360deg); } }
 
-
-  /* ─── NEW: SOLUTIONS TIMELINE (NO CARDS, PURE DATA SPINES) ─── */
+  /* ─── SOLUTIONS TIMELINE ─────────────────────────────────────── */
   .section { padding: 6rem 8% 4rem; position: relative; z-index: 10; }
   
   .solutions-timeline {
@@ -250,13 +268,11 @@
     display: flex; flex-direction: column; gap: 8rem; padding: 4rem 0;
   }
 
-  /* The Central Data Wire running through the solutions */
   .timeline-wire {
     position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
     width: 2px; background: rgba(255,255,255,0.05); z-index: 0;
   }
   
-  /* Pulses traveling down the timeline */
   .wire-pulse {
     position: absolute; width: 4px; height: 60px; left: -1px; border-radius: 4px;
     background: #ffffff; box-shadow: 0 0 15px #ffffff, 0 0 30px rgba(255,255,255,0.5);
@@ -277,7 +293,6 @@
   }
   .row-reverse { flex-direction: row-reverse; }
 
-  /* The node on the wire for each solution */
   .sol-node {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     width: 14px; height: 14px; border-radius: 50%;
@@ -286,15 +301,12 @@
 
   .sol-visual-col, .sol-text-col { width: 42%; }
   
-  /* Text Styling */
   .sol-text-col h3 { font-size: 1.8rem; font-weight: 700; color: var(--white); margin-bottom: 1rem; letter-spacing: -0.02em; }
   .sol-text-col p { color: var(--zinc-400); line-height: 1.7; font-size: 1.05rem; font-weight: 300; margin: 0; }
   
-  /* Text Alignment towards the center spine */
   .solution-row .sol-text-col { text-align: left; }
   .solution-row.row-reverse .sol-text-col { text-align: right; }
 
-  /* Transparent Animation Containers */
   .solution-visual-transparent {
     width: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;
   }
@@ -338,8 +350,7 @@
   .edge-rack:nth-child(3) .edge-light { animation-delay: 0.4s; }
   @keyframes blinkFast { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-
-  /* ─── SECTION CONNECTING WIRES (The Bridge) ─── */
+  /* ─── SECTION CONNECTING WIRES ─── */
   .section-connector {
     width: 100%; height: 250px; position: relative; overflow: hidden; display: flex; justify-content: center; margin-top: -2rem;
   }
@@ -351,8 +362,7 @@
   }
   @keyframes flowData { 0% { stroke-dashoffset: 280; } 100% { stroke-dashoffset: 0; } }
 
-
-  /* ─── OUR CLIENTS (CASE STUDY BENTO GRID) ─────────────────────────────── */
+  /* ─── OUR CLIENTS ─────────────────────────────── */
   .clients-content { position: relative; z-index: 10; }
   .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; }
 
@@ -430,32 +440,73 @@
   .reveal { opacity: 0; transform: translateY(40px); transition: 1.2s var(--ease); filter: blur(4px); }
   .reveal.active { opacity: 1; transform: translateY(0); filter: blur(0px); }
 
+  /* ─── RESPONSIVE PHONE / TABLET STYLES ────────────────────────── */
   @media (max-width: 1024px) {
-    .col-8, .col-6, .col-4 { grid-column: span 12; }
-    
-    /* Timeline Mobile Fixes */
-    .timeline-wire { left: 5%; }
-    .sol-node { left: 5%; }
-    .solution-row, .solution-row.row-reverse { flex-direction: column; align-items: flex-start; padding-left: 15%; }
-    .sol-visual-col, .sol-text-col { width: 100%; }
-    .solution-row .sol-text-col, .solution-row.row-reverse .sol-text-col { text-align: left; }
-    .solution-visual-transparent { justify-content: flex-start; padding: 1rem 0; }
-    
-    .hero-left-mini { left: 5%; top: 20%; text-align: left; }
-    .hero-right-mini { right: 5%; top: 80%; text-align: left; max-width: 90%; }
-    .nav-center { display: none; }
-    
+    /* Dynamic Mobile Hero Layout */
+    .hero {
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 7rem 1.5rem 3rem 1.5rem;
+      min-height: 100svh;
+      text-align: center;
+    }
+
+    .hero-left-mini {
+      position: relative; left: auto; top: auto; transform: none;
+      width: 100%; max-width: 100%; margin-bottom: 1rem;
+    }
+    .hero-left-mini h2 {
+      font-size: clamp(2.4rem, 8vw, 3.2rem) !important;
+    }
+
+    /* Robot takes clean center stage */
+    .spline-wrapper {
+      position: relative;
+      width: 100%;
+      height: 44vh;
+      min-height: 320px;
+    }
+
+    .hero-right-mini {
+      position: relative; right: auto; top: auto; transform: none;
+      width: 100%; max-width: 100%; margin-top: 1rem;
+    }
+    .hero-right-mini p {
+      font-size: 0.95rem; max-width: 440px; margin: 0 auto;
+    }
+
+    .spline-watermark-blocker {
+      display: none; /* Spline part(logo) hides it natively */
+    }
+
+    /* Solar System Responsive */
     .solar-left-mini, .solar-right-mini, .solar-bottom-mini { 
       position: relative; left: auto; right: auto; top: auto; bottom: auto;
-      transform: none; text-align: center; margin: 2rem auto; max-width: 90%; padding: 0 5%;
+      transform: none; text-align: center; margin: 1.5rem auto; max-width: 90%; padding: 0;
     }
-    
+    .solar-system { transform: scale(0.65); height: 550px; margin-top: -60px; }
+
+    /* Timeline on Mobile */
+    .timeline-wire { left: 24px; }
+    .sol-node { left: 24px; }
+    .solution-row, .solution-row.row-reverse {
+      flex-direction: column; align-items: flex-start; padding-left: 55px; gap: 1rem;
+    }
+    .sol-visual-col, .sol-text-col { width: 100%; text-align: left !important; }
+    .solution-visual-transparent { justify-content: flex-start; padding: 0.5rem 0 1rem; }
+    .solutions-timeline { gap: 5rem; }
+
+    /* Clients Grid */
+    .col-8, .col-6, .col-4 { grid-column: span 12; }
+    .client-card { padding: 2.5rem 1.8rem; }
     .footer-container { grid-template-columns: 1fr; gap: 3rem; }
-    .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
-    .solar-system { transform: scale(0.6); height: 600px; margin-top: -100px; }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
   }
-  @media (max-width: 768px) {
-    .solar-system { transform: scale(0.35); height: 400px; margin-top: -150px; }
+
+  @media (max-width: 600px) {
+    .solar-system { transform: scale(0.4); height: 380px; margin-top: -120px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; /* Conserve header space on very small screens */ }
   }
 </style>
 </head>
@@ -474,6 +525,7 @@
 <section class="hero">
   <div class="hero-fog"></div>
 
+  <!-- Top Hero Title -->
   <div class="hero-left-mini reveal">
     <div class="tag-pill" style="pointer-events: auto;">
       <div class="status-dot"></div>eyes on your data // ONLINE
@@ -481,16 +533,18 @@
     <h2 style="font-size: 3.5rem; font-weight: 900; line-height: 0.9; letter-spacing: -0.06em; margin-top: 5px; background: linear-gradient(180deg, #ffffff 0%, #71717a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TAKE<br/>CONTROL.</h2>
   </div>
 
+  <!-- 3D Robot Viewer -->
+  <div class="spline-wrapper reveal">
+    <spline-viewer id="robot-spline" loading-anim-type="spinner" url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"></spline-viewer>
+    <div class="spline-watermark-blocker"></div>
+  </div>
+
+  <!-- Bottom Hero Description -->
   <div class="hero-right-mini reveal">
-    <p style="color:var(--zinc-400); font-weight:300; font-size:1rem; line-height:1.6; margin-top: 1rem;">
+    <p style="color:var(--zinc-400); font-weight:300; font-size:1rem; line-height:1.6;">
       Unlocking total operational defense. NORA AI automates theft control, document syncing, and wastage management for physical empires.
     </p>
     <a href="#contact" class="btn" style="margin-top: 1.5rem; padding: 1rem 2.5rem; font-size: 0.75rem;">Initialize Access <span style="font-size:1.1rem;">→</span></a>
-  </div>
-
-  <div class="spline-wrapper reveal">
-    <spline-viewer loading-anim-type="spinner" url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"></spline-viewer>
-    <div class="spline-watermark-blocker"></div>
   </div>
 </section> 
 
@@ -498,7 +552,7 @@
 <section id="erp-ecosystem" class="erp-solar-section">
   
   <div class="solar-header reveal">
-    <h2 style="font-size: clamp(3rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: -0.05em; color: var(--white);">ERP SYSTEM.</h2>
+    <h2 style="font-size: clamp(2.6rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: -0.05em; color: var(--white);">ERP SYSTEM.</h2>
     <p style="color:var(--zinc-500); font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.15em; margin-top:1rem; text-transform: uppercase;">
       ENGINEERED IN ETHIOPIA. ARCHITECTED FOR SCALE.<br/>DELIVERING ENTERPRISE-GRADE INFRASTRUCTURE.
     </p>
@@ -506,7 +560,7 @@
 
   <!-- FLOATING LEFT-SIDE TEXT -->
   <div class="solar-left-mini reveal" style="transition-delay: 0.1s;">
-    <h3 style="font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; color: var(--white); margin-bottom: 0.5rem;">Offline-First Core</h3>
+    <h3 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; color: var(--white); margin-bottom: 0.5rem;">Offline-First Core</h3>
     <p style="color:var(--zinc-400); font-weight:300; font-size:0.95rem; line-height:1.6;">
       Built for the real world. Our edge-caching architecture ensures your operations run flawlessly even when the internet drops.
     </p>
@@ -514,7 +568,7 @@
 
   <!-- FLOATING RIGHT-SIDE TEXT -->
   <div class="solar-right-mini reveal" style="transition-delay: 0.2s;">
-    <h3 style="font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; color: var(--white); margin-bottom: 0.5rem;">Multi-Site Sync</h3>
+    <h3 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; color: var(--white); margin-bottom: 0.5rem;">Multi-Site Sync</h3>
     <p style="color:var(--zinc-400); font-weight:300; font-size:0.95rem; line-height:1.6;">
       Manage multiple warehouses, production lines, and dispatch bays in real-time from a single, unified digital command center.
     </p>
@@ -522,7 +576,7 @@
 
   <!-- FLOATING BOTTOM-CENTER TEXT -->
   <div class="solar-bottom-mini reveal" style="transition-delay: 0.3s;">
-    <h3 style="font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; color: var(--white); margin-bottom: 0.5rem;">Frictionless UI</h3>
+    <h3 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; color: var(--white); margin-bottom: 0.5rem;">Frictionless UI</h3>
     <p style="color:var(--zinc-400); font-weight:300; font-size:0.95rem; line-height:1.6;">
       Zero learning curve. Intuitive, role-based interfaces designed specifically for floor workers, not just IT experts.
     </p>
@@ -550,22 +604,19 @@
 <!-- SECTION 3: OUR SOLUTIONS (Vertical Timeline with Central Data Wire) -->
 <section id="solutions" class="section">
   <div class="features-content">
-    <div class="reveal" style="margin-bottom: 6rem; text-align: center;">
-      <h2 style="font-size: 3.5rem; font-weight: 900; letter-spacing: -0.05em; color: var(--white);">OUR SOLUTIONS.</h2>
+    <div class="reveal" style="margin-bottom: 5rem; text-align: center;">
+      <h2 style="font-size: clamp(2.6rem, 6vw, 3.5rem); font-weight: 900; letter-spacing: -0.05em; color: var(--white);">OUR SOLUTIONS.</h2>
       <p style="color:var(--zinc-500); font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.1em; margin-top:1rem; text-transform: uppercase;">Command every variable.</p>
     </div>
 
-    <!-- The Vertical Timeline Layout -->
     <div class="solutions-timeline">
-      
-      <!-- The Central Data Wire running down the middle -->
       <div class="timeline-wire">
         <div class="wire-pulse"></div>
         <div class="wire-pulse"></div>
         <div class="wire-pulse"></div>
       </div>
 
-      <!-- Solution 1: Left Visual, Right Text -->
+      <!-- Solution 1 -->
       <div class="solution-row reveal">
         <div class="sol-visual-col">
           <div class="solution-visual-transparent">
@@ -579,7 +630,7 @@
         </div>
       </div>
 
-      <!-- Solution 2: Right Visual, Left Text (row-reverse) -->
+      <!-- Solution 2 -->
       <div class="solution-row row-reverse reveal">
         <div class="sol-visual-col">
           <div class="solution-visual-transparent">
@@ -595,7 +646,7 @@
         </div>
       </div>
 
-      <!-- Solution 3: Left Visual, Right Text -->
+      <!-- Solution 3 -->
       <div class="solution-row reveal">
         <div class="sol-visual-col">
           <div class="solution-visual-transparent">
@@ -611,7 +662,7 @@
         </div>
       </div>
 
-      <!-- Solution 4: Right Visual, Left Text (row-reverse) -->
+      <!-- Solution 4 -->
       <div class="solution-row row-reverse reveal">
         <div class="sol-visual-col">
           <div class="solution-visual-transparent">
@@ -625,7 +676,7 @@
         </div>
       </div>
 
-      <!-- Solution 5: Left Visual, Right Text -->
+      <!-- Solution 5 -->
       <div class="solution-row reveal">
         <div class="sol-visual-col">
           <div class="solution-visual-transparent">
@@ -639,7 +690,7 @@
         </div>
       </div>
 
-      <!-- Solution 6: Right Visual, Left Text (row-reverse) -->
+      <!-- Solution 6 -->
       <div class="solution-row row-reverse reveal">
         <div class="sol-visual-col">
           <div class="solution-visual-transparent">
@@ -661,7 +712,7 @@
   </div>
 </section>
 
-<!-- CONNECTING CIRCUIT WIRES (The Bridge to Clients) -->
+<!-- CONNECTING CIRCUIT WIRES -->
 <div class="section-connector reveal">
   <svg class="circuit-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
     <path class="circuit-path" d="M 50 0 L 50 100" />
@@ -675,16 +726,16 @@
   </svg>
 </div>
 
-<!-- SECTION 4: OUR CLIENTS (Case Studies) -->
+<!-- SECTION 4: OUR CLIENTS -->
 <section id="clients" class="section" style="padding-top: 2rem;">
   <div class="clients-content">
     <div class="reveal" style="margin-bottom: 4rem; text-align: center;">
-      <h2 style="font-size: 3.5rem; font-weight: 900; letter-spacing: -0.05em; color: var(--white);">OUR CLIENTS.</h2>
+      <h2 style="font-size: clamp(2.6rem, 6vw, 3.5rem); font-weight: 900; letter-spacing: -0.05em; color: var(--white);">OUR CLIENTS.</h2>
       <p style="color:var(--zinc-500); font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.1em; margin-top:1rem; text-transform: uppercase;">Trusted by industry leaders.</p>
     </div>
 
     <div class="bento-grid">
-      <!-- Partner 1 -->
+      <!-- Sara Group -->
       <div class="client-card col-6 reveal">
         <div>
           <span class="industry-tag">Manufacturing</span>
@@ -697,7 +748,7 @@
         </div>
       </div>
 
-      <!-- Partner 2 -->
+      <!-- Tade GG Coffee -->
       <div class="client-card col-6 reveal" style="transition-delay: 0.1s;">
         <div>
           <span class="industry-tag">Global Export</span>
@@ -710,7 +761,7 @@
         </div>
       </div>
 
-      <!-- Partner 3 -->
+      <!-- Buno Coffee -->
       <div class="client-card col-8 reveal">
         <div>
           <span class="industry-tag">Enterprise Export</span>
@@ -724,7 +775,7 @@
         </div>
       </div>
 
-      <!-- Partner 4 -->
+      <!-- Maya Restaurant -->
       <div class="client-card col-4 reveal" style="transition-delay: 0.1s;">
         <div>
           <span class="industry-tag">Hospitality</span>
@@ -763,10 +814,10 @@
       <div class="footer-col reveal" style="transition-delay: 0.1s;">
         <h3>Protocols</h3>
         <ul>
-          <li><a href="#features">Theft Control</a></li>
-          <li><a href="#features">Cloud Vault</a></li>
-          <li><a href="#features">Yield Guard</a></li>
-          <li><a href="#features">Command Center</a></li>
+          <li><a href="#solutions">Theft Control</a></li>
+          <li><a href="#solutions">Cloud Vault</a></li>
+          <li><a href="#solutions">Yield Guard</a></li>
+          <li><a href="#solutions">Command Center</a></li>
         </ul>
       </div>
 
@@ -804,6 +855,19 @@
 </footer>
 
 <script>
+/* ─── SMOOTH SPLINE INITIALIZATION ─── */
+const robotSpline = document.getElementById('robot-spline');
+if (robotSpline) {
+  // Listen for the scene load event to smoothly fade in the robot
+  robotSpline.addEventListener('load', () => {
+    robotSpline.classList.add('loaded');
+  });
+  // Fallback in case load event fires before listener
+  setTimeout(() => {
+    robotSpline.classList.add('loaded');
+  }, 1200);
+}
+
 /* ─── REVEAL ON SCROLL ─── */
 const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
 const observer = new IntersectionObserver((entries) => {
@@ -815,11 +879,10 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, observerOptions);
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-</script>
 
-<script>
-  /* ─── DYNAMIC ASTEROID BELT GENERATOR ─── */
-  const belt = document.getElementById('asteroid-belt');
+/* ─── DYNAMIC ASTEROID BELT GENERATOR ─── */
+const belt = document.getElementById('asteroid-belt');
+if (belt) {
   const numAsteroids = 150;
   const beltRadius = 350; 
 
@@ -843,6 +906,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     
     belt.appendChild(rock);
   }
+}
 </script>
 
 </body>
